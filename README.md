@@ -84,7 +84,7 @@ queries run within the tool.
          -cp build/libs/airpal-*-all.jar com.airbnb.airpal.AirpalApplication db migrate reference.yml
     ```
 
-1. Run Airpal.
+1. Run Airpal using AdRoll S3 Bucket as a storage layer.
 
     ```
     java -server \

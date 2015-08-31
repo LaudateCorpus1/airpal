@@ -40,8 +40,11 @@ import com.airbnb.airpal.sql.jdbi.URIArgumentFactory;
 import com.airbnb.airpal.sql.jdbi.UUIDArgumentFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.AsyncEventBus;
@@ -257,12 +260,7 @@ public class AirpalModule extends AbstractModule
     @Provides
     public AWSCredentials provideAWSCredentials()
     {
-        if ((config.getS3AccessKey() == null) || (config.getS3SecretKey() == null)) {
-            return null;
-        } else {
-            return new BasicAWSCredentials(config.getS3AccessKey(),
-                    config.getS3SecretKey());
-        }
+        return new DefaultAWSCredentialsProviderChain().getCredentials();
     }
 
     @Singleton
@@ -272,8 +270,8 @@ public class AirpalModule extends AbstractModule
         if (awsCredentials == null) {
             return new AmazonS3Client();
         }
-
-        return new AmazonS3Client(awsCredentials);
+        AmazonS3Client s3c = new AmazonS3Client(awsCredentials);
+        return s3c;
     }
 
     @Singleton
