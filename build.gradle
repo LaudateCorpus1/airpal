@@ -72,8 +72,8 @@ dependencies {
     }
     compile group: 'com.facebook.presto', name: 'presto-parser', version:prestoVersion
     compile group: 'com.hubspot.rosetta', name: 'RosettaJdbi', version:'2.1-SNAPSHOT'
-    compile group: 'net.sf.opencsv', name: 'opencsv', version:'2.3'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk', version:'1.6.8'
+    compile group: 'com.opencsv', name: 'opencsv', version:'3.2'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk', version:'1.10.6'
     compile group: 'org.apache.shiro', name: 'shiro-web', version:'1.2.3'
     compile group: 'org.apache.shiro', name: 'shiro-guice', version:'1.2.3'
     compile group: 'org.secnod.dropwizard', name: 'dropwizard-shiro', version:'0.1.0'
@@ -113,6 +113,29 @@ task buildAssets(type: NodeTask) {
     }
 }
 
+task buildTar(type: Tar) {
+  baseName = project.name
+  compression = Compression.GZIP
+  extension = "tar.gz"
+
+  into("$baseName-$version/lib") {
+    from jar.archivePath
+    from configurations.runtime
+  }
+
+  into("$baseName-$version/bin") {
+    from "scripts/airpal"
+    fileMode 0755
+  }
+
+  into("$baseName-$version") {
+    from "reference.example.yml"
+    rename { String fileName ->
+      fileName.replace('example.', '')
+    }
+  }
+}
+
 shadowJar {
     transform(com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer)
     exclude 'META-INF/*.DSA'
@@ -124,4 +147,5 @@ shadowJar {
 
 buildAssets.dependsOn installAssets
 compileJava.dependsOn buildAssets
+buildTar.dependsOn jar
 clean.dependsOn cleanAssets
