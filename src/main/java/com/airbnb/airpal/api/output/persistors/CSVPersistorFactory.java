@@ -17,7 +17,7 @@ public class CSVPersistorFactory
     public Persistor getPersistor(Job job, PersistentJobOutput jobOutput)
     {
         // TODO: Support variable CSV persistor.
-        if (useS3Persistor) {
+        if (!s3Bucket.equals("")) { // Changed to always use S3 Persistor
             return new S3FilePersistor(s3Client, s3Bucket, 0L);
         } else {
             return new FlatFilePersistor(expiringFileStore);

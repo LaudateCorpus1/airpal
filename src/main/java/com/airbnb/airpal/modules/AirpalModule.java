@@ -40,6 +40,9 @@ import com.airbnb.airpal.sql.jdbi.URIArgumentFactory;
 import com.airbnb.airpal.sql.jdbi.UUIDArgumentFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -257,23 +260,19 @@ public class AirpalModule extends AbstractModule
     @Provides
     public AWSCredentials provideAWSCredentials()
     {
-        if ((config.getS3AccessKey() == null) || (config.getS3SecretKey() == null)) {
-            return null;
-        } else {
-            return new BasicAWSCredentials(config.getS3AccessKey(),
-                    config.getS3SecretKey());
-        }
+        return new DefaultAWSCredentialsProviderChain().getCredentials();
     }
 
     @Singleton
     @Provides
     public AmazonS3 provideAmazonS3Client(AWSCredentials awsCredentials)
     {
-        if (awsCredentials == null) {
-            return new AmazonS3Client();
-        }
+        // Altered so that awsCredentials is not used to construct the S3Client
+        // This utilizes the amazon api to control token refresh and their libraries
+        // to handle passing credentials around.
 
-        return new AmazonS3Client(awsCredentials);
+        AmazonS3Client s3c = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+        return s3c;
     }
 
     @Singleton
